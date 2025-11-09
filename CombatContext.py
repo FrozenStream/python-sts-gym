@@ -1,28 +1,28 @@
-from Enemys import Enemy
-from Player import Player
 from Entity import Entity
+from Enemys import Enemy
 from Cards import Card
 import random
 from CommandIO import chooseCard, endTurn
+from Powers import Power
 
 
 class CombatContext:
-    def __init__(self, player, enemies, draw_pile: list[Card], debug: bool = False):
+    def __init__(self, player: Entity, enemies: list[Enemy], draw_pile: list[Card], debug: bool = False):
         self.debug = debug
 
-        self.player: Player = player
+        self.player: Entity = player
         self.enemies: list[Enemy] = enemies
 
         self.turns = 0
-        self.Cost = 0
+        self.Energy = 0
 
         self.draw_pile: list[Card] = draw_pile
         self.hand: list[Card] = []
         self.discard_pile: list[Card] = []
 
-    def debugPrint(self, msg: str):
+    def debugPrint(self, msg: str, end: str = "\n"):
         if (self.debug):
-            print(msg)
+            print(msg, end=end)
 
     def checkEnd(self) -> bool:
         """
@@ -31,21 +31,26 @@ class CombatContext:
         """
         end: bool = False
         if (self.player.current_hp <= 0):
-            self.debugPrint(f"Debug: Player {self.player.name} died.")
+            self.debugPrint(f"Debug: Player {self.player.name} lost.")
             end = True
         if (all(enemy.OUT for enemy in self.enemies)):
-            self.debugPrint("Debug: All enemies died.")
+            self.debugPrint("Debug: All enemies lost.")
             end = True
-        if (end):
-            self.debugPrint(f"Debug: Player {self.player.name} won.")
-        else:
-            self.debugPrint(f"Debug: Player {self.player.name} lost.")
         return end
 
     def PlayCard(self):
-        card: Card = chooseCard(self)
-        card.play(self)
+        self.debugPrint("Debug: Player choose a card.")
+        for i, card in enumerate(self.hand):
+            self.debugPrint(f"{i}. {card.name} Cost {card.cost}")
+        card: Card = chooseCard(self.hand)
+        if (self.Energy < card.cost):
+            self.debugPrint("Debug: Player not enough power.")
+            return
+        self.Energy -= card.cost
+        card.work(self)
+        self.debugPrint(f"Debug: Player play {card.name}.")
 
+        self.hand.remove(card)
         if (not card.is_exhaust):
             self.discard_pile.append(card)
 
@@ -55,10 +60,10 @@ class CombatContext:
         返回值：是否结束游戏
         """
         for enemy in self.enemies:
-            enemy.move(self)
+            enemy.move(self, self.turns)
             self.debugPrint(f"Debug: {enemy.name} moved.")
             if (self.checkEnd()): return True
-            
+
         return False
 
     def player_turn(self) -> bool:
@@ -67,18 +72,19 @@ class CombatContext:
         返回值：是否结束游戏
         """
         self.turns += 1
-        self.Cost = 3
-
+        self.Energy = 3
+        self.player.clearShield()
         drawCards(self, 5)
         while (True):
-            # self.UsePotion()
-            # 出牌阶段
-            self.PlayCard()
-            if (self.checkEnd()):
-                return True
-            # 判断回合结束
-            if (endTurn(self)):
-                break
+            self.debugPrint(f"DEBUG: Player HP {self.player.current_hp}")
+            self.debugPrint(f'DEBUG: Player Shield {self.player.shield}')
+            self.debugPrint(f"DEBUG: Player Energy {self.Energy}")
+            for idx, enemy in enumerate(self.enemies):
+                self.debugPrint(f"DEBUG: {idx} {enemy.name} HP {enemy.current_hp}")
+                self.debugPrint(f"DEBUG: {idx} {enemy.name} Shield {enemy.shield}")
+            self.PlayCard()                         # 出牌动作
+            if (self.checkEnd()): return True       # 检查是否结束游戏
+            if (endTurn()): break                   # 结束回合动作
 
         # 手牌全部弃置
         for card in self.hand:
@@ -90,8 +96,8 @@ class CombatContext:
 
     def Move(self):
         while (True):
-            self.player_turn()
-            self.enemys_turn()
+            if (self.player_turn()): break
+            if (self.enemys_turn()): break
 
 
 def hurtEntity(context: CombatContext, attacker: Entity, target: Entity, damage: int):
@@ -100,8 +106,10 @@ def hurtEntity(context: CombatContext, attacker: Entity, target: Entity, damage:
 
 def attackEntity(context: CombatContext, attacker: Entity, target: Entity, damage: int):
     damage = bufferedDamage(context, attacker, damage)
+    if(target.power_pool.getPower(Power.VULNERABLE) > 0):
+        damage = int(damage * 1.5)
     target.receiveDamage(damage)
-    thorns = target.power_pool.thorns
+    thorns = target.power_pool.getPower(Power.THORNS)
     if (thorns > 0):
         hurtEntity(context, target, attacker, thorns)
 
@@ -122,8 +130,8 @@ def getPower(context: CombatContext, target: Entity, power: int):
     target.power_pool.addPower(power, power)
 
 
-def getCost(context: CombatContext, cost: int):
-    context.Cost += cost
+def getEnergy(context: CombatContext, energy: int):
+    context.Energy += energy
 
 
 def reshuffleIntoDrawPile(context: CombatContext):
@@ -141,7 +149,7 @@ def drawCards(context: CombatContext, num: int):
 
 
 def bufferedDamage(context: CombatContext, attacker: Entity, origin: int) -> int:
-    damage = origin+attacker.power_pool.strength
-    if (attacker.power_pool.weak > 0):
-        damage = int(damage*0.75)
+    damage = origin + attacker.power_pool.getPower(Power.STRENGTH)
+    if (attacker.power_pool.getPower(Power.WEAK) > 0):
+        damage = int(damage * 0.75)
     return damage

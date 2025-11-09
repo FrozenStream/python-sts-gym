@@ -1,5 +1,4 @@
 from Entity import Entity
-from Powers import Power
 
 class Player(Entity):
     """玩家类"""

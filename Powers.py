@@ -15,5 +15,8 @@ class Power(Enum):
 class PowerPool():
     _powers: list[int] = [0] * len(Power)
 
+    def getPower(self, power: Power) -> int:
+        return self._powers[power.value]
+
     def addPower(self, power: Power, amount: int):
         self._powers[power.value] += amount
