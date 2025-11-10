@@ -1,4 +1,16 @@
 import numpy as np
+from enum import Enum
+
+
+
+class IOtype(Enum):
+    CHOOSE_CARD = 0
+    CHOOSE_ENTITY = 1
+    END_TURN = 2
+    
+
+
+
 
 
 def chooseEntity(Entitys: list):
@@ -22,4 +34,8 @@ def endTurn() -> bool:
     print('是否结束回合？(0: 否, 1: 是)')
     choice = int(input())
     return choice == 1
+
+
+
+
 

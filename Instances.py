@@ -1,20 +1,18 @@
 from Cards import Card
-from CommandIO import chooseEntity
 from CombatContext import *
 from Powers import Power
 from Enemys import Enemy
 from typing import Callable, Tuple
 
-attack_lambda: Tuple[Callable[[CombatContext], None], ...] = (
-    lambda context:
-    attackEntity(context, context.player, chooseEntity(context.enemies), 6),
+attack_lambda: Callable[[CombatContext], None] = lambda context: (
+    attackEntity(context, context.player, context.changeActionType(IOtype.CHOOSE_ENTITY), 6),
 )
+
 attack = Card('attack', False, False, False, 1, attack_lambda)
 
 
-defend_lambda: Tuple[Callable[[CombatContext], None], ...] = (
-    lambda context:
-    getShield(context, context.player, 6),
+defend_lambda: Callable[[CombatContext], None] = lambda context: (
+    getShield(context, context.player, 6)
 )
 defend = Card('defend', False, False, False, 1, defend_lambda)
 
@@ -25,15 +23,12 @@ def createJawWorm() -> Enemy:
     Powers = (
         (Power.STRENGTH, 0),
     )
-    actions_lambda: Tuple[Tuple[Callable[[CombatContext], None], ...], ...] = (
-        (
-            lambda context:
+    actions_lambda: Tuple[Callable[[CombatContext], None], ...] = (
+        lambda context: (
             attackEntity(context, Jaw_Worm, context.player, 8),
         ),
-        (
-            lambda context:
+        lambda context: (
             attackEntity(context, Jaw_Worm, context.player, 4),
-            lambda context:
             getShield(context, Jaw_Worm, 6),
         ),
     )

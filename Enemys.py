@@ -12,7 +12,7 @@ class Enemy(Entity):
 
         self.OUT = False
 
-    def InitActions(self, actions: Tuple[Tuple[Callable, ...], ...]):
+    def InitActions(self, actions: Tuple[Callable, ...]):
         self.actions = actions
 
     def move(self, context, turn_num: int):

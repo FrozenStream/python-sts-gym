@@ -2,13 +2,14 @@ from Entity import Entity
 from Enemys import Enemy
 from Cards import Card
 import random
-from CommandIO import chooseCard, endTurn
+from CommandIO import chooseCard, endTurn, IOtype
 from Powers import Power
 
 
 class CombatContext:
     def __init__(self, player: Entity, enemies: list[Enemy], draw_pile: list[Card], debug: bool = False):
         self.debug = debug
+        self.ActionType: IOtype = IOtype.CHOOSE_CARD
 
         self.player: Entity = player
         self.enemies: list[Enemy] = enemies
@@ -21,8 +22,10 @@ class CombatContext:
         self.discard_pile: list[Card] = []
 
     def debugPrint(self, msg: str, end: str = "\n"):
-        if (self.debug):
-            print(msg, end=end)
+        if (self.debug): print(msg, end=end)
+
+    def changeActionType(self, actionType: IOtype):
+        self.ActionType = actionType
 
     def checkEnd(self) -> bool:
         """
@@ -38,21 +41,12 @@ class CombatContext:
             end = True
         return end
 
-    def PlayCard(self):
-        self.debugPrint("Debug: Player choose a card.")
-        for i, card in enumerate(self.hand):
-            self.debugPrint(f"{i}. {card.name} Cost {card.cost}")
-        card: Card = chooseCard(self.hand)
-        if (self.Energy < card.cost):
-            self.debugPrint("Debug: Player not enough power.")
-            return
+    def PlayCard(self, card: Card):
+        if (self.Energy < card.cost): return
         self.Energy -= card.cost
         card.work(self)
-        self.debugPrint(f"Debug: Player play {card.name}.")
-
         self.hand.remove(card)
-        if (not card.is_exhaust):
-            self.discard_pile.append(card)
+        if (not card.is_exhaust): self.discard_pile.append(card)
 
     def enemys_turn(self) -> bool:
         """
@@ -76,15 +70,10 @@ class CombatContext:
         self.player.clearShield()
         drawCards(self, 5)
         while (True):
-            self.debugPrint(f"DEBUG: Player HP {self.player.current_hp}")
-            self.debugPrint(f'DEBUG: Player Shield {self.player.shield}')
-            self.debugPrint(f"DEBUG: Player Energy {self.Energy}")
-            for idx, enemy in enumerate(self.enemies):
-                self.debugPrint(f"DEBUG: {idx} {enemy.name} HP {enemy.current_hp}")
-                self.debugPrint(f"DEBUG: {idx} {enemy.name} Shield {enemy.shield}")
-            self.PlayCard()                         # 出牌动作
-            if (self.checkEnd()): return True       # 检查是否结束游戏
-            if (endTurn()): break                   # 结束回合动作
+            card: Card = chooseCard(self.hand)                  # 出牌动作
+            self.PlayCard(card)
+            if (self.checkEnd()): return True                   # 检查是否结束游戏
+            if (endTurn()): break                               # 结束回合动作
 
         # 手牌全部弃置
         for card in self.hand:
@@ -106,7 +95,7 @@ def hurtEntity(context: CombatContext, attacker: Entity, target: Entity, damage:
 
 def attackEntity(context: CombatContext, attacker: Entity, target: Entity, damage: int):
     damage = bufferedDamage(context, attacker, damage)
-    if(target.power_pool.getPower(Power.VULNERABLE) > 0):
+    if (target.power_pool.getPower(Power.VULNERABLE) > 0):
         damage = int(damage * 1.5)
     target.receiveDamage(damage)
     thorns = target.power_pool.getPower(Power.THORNS)
