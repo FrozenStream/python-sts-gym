@@ -19,3 +19,13 @@ cards = [
     defend,
     defend,
 ]
+
+
+ctx = CombatContext(player, enemy, cards, debug=True)
+gym = STS_Gym()
+gym.reset(ctx)
+while(True):
+    game_end = ctx.toNextState()
+    
+    state = gym.getState(ctx)
+    pass

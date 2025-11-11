@@ -22,7 +22,7 @@ cards = [
 
 
 ctx = CombatContext(player, enemy, cards, debug=True)
-while(not ctx.rl_step()):
+while(not ctx.human_step()):
     pass
 # gym = STS_Gym()
 # gym.reset(ctx)

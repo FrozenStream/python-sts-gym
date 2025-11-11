@@ -11,8 +11,10 @@ class STS_Gym:
         pass
 
     def step(self, context: CombatContext, action: np.ndarray):
+        game_end = context.rl_step(action)
+        game_end = game_end or context.toNextState()
         
-
+        if(game_end): return context.player_win_flag
 
     def reset(self, context: CombatContext):
         self.context = CombatContext()
@@ -30,8 +32,7 @@ class STS_Gym:
         is_end = context.is_end
         pass
 
-    def checkStateEnd(self, State: np.ndarray) -> bool:
-        pass
 
     def getAction(self, state: np.ndarray) -> np.ndarray:
         pass
+
