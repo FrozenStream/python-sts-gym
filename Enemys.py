@@ -17,5 +17,4 @@ class Enemy(Entity):
 
     def move(self, context, turn_num: int):
         num = (turn_num - 1) % len(self.actions)
-        for action in self.actions[num]:
-            action(context)
+        self.actions[num](context)

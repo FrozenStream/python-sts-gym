@@ -19,16 +19,3 @@ cards = [
     defend,
     defend,
 ]
-
-
-ctx = CombatContext(player, enemy, cards, debug=True)
-while(not ctx.rl_step()):
-    pass
-# gym = STS_Gym()
-# gym.reset(ctx)
-# state = gym.getState(ctx)
-
-# while(not gym.checkStateEnd(state)):
-#     action = gym.getAction(state)
-#     gym.step(ctx, action)
-#     state = gym.getState(ctx)

@@ -1,41 +1,33 @@
 import numpy as np
 from enum import Enum
-
-
+from Entity import Entity
+from Cards import Card
 
 class IOtype(Enum):
     CHOOSE_CARD = 0
     CHOOSE_ENTITY = 1
-    END_TURN = 2
-    
+    CHOOSE_DISCARD = 2
 
 
-
-
-
-def chooseEntity(Entitys: list):
+def human_chooseEntity(Entitys: list[Entity]) -> np.ndarray:
     """选择实体"""
-    print('请选择实体：')
+    print('Debug: Please choose an entity.')
+    for i, entity in enumerate(Entitys):
+        print(f'{i}: {entity.name}')
     choice = int(input())
-    return Entitys[choice]
+
+    ans = np.array([0] * 11)
+    ans[choice] = 1
+    return ans
 
 
-def chooseCard(hand: list):
+def human_chooseCard(hand: list[Card]) -> np.ndarray:
     """选择卡牌"""
+    print('Debug: Please choose a card.')
+    print('0: End your turn')
+    for i, card in enumerate(hand):
+        print(f'{i + 1}: {card.name} Cost: {card.cost}')
     choice = int(input())
-    return hand[choice]
-
-
-def endTurn() -> bool:
-    """
-    结束回合
-    返回值：是否结束游戏
-    """
-    print('是否结束回合？(0: 否, 1: 是)')
-    choice = int(input())
-    return choice == 1
-
-
-
-
-
+    ans = np.array([0] * 11)
+    ans[choice] = 1
+    return ans

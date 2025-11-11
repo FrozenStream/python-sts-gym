@@ -7,24 +7,17 @@ from Cards import Card
 
 
 class STS_Gym:
-    def __init__(self, context: CombatContext):
+    def __init__(self):
         pass
 
     def step(self, context: CombatContext, action: np.ndarray):
-        match context.ActionType:
-            case IOtype.CHOOSE_CARD:
-                card:Card = context.hand[0]
-                context.PlayCard(card)
-            case IOtype.CHOOSE_ENTITY:
-                pass
-            case IOtype.END_TURN:
-                pass
+        
 
 
     def reset(self, context: CombatContext):
         self.context = CombatContext()
 
-    def getState(self, context: CombatContext) -> str:
+    def getState(self, context: CombatContext) -> np.ndarray:
         cur_hp = context.player.current_hp
         max_hp = context.player.max_hp
         cur_shield = context.player.shield
@@ -33,4 +26,12 @@ class STS_Gym:
             (enemy.current_hp, enemy.max_hp, enemy.shield)
             for enemy in context.enemies
         ]
+
+        is_end = context.is_end
+        pass
+
+    def checkStateEnd(self, State: np.ndarray) -> bool:
+        pass
+
+    def getAction(self, state: np.ndarray) -> np.ndarray:
         pass
