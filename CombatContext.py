@@ -112,7 +112,7 @@ class CombatContext:
                 self.debugPrint(f"Debug: Player HP: {self.player.current_hp}, Shield: {self.player.shield}")
                 for enemy in self.enemies: self.debugPrint(f"Debug: Enemy {enemy.name} HP: {enemy.current_hp}, Shield: {enemy.shield}")
 
-                choice: np.ndarray = human_chooseCard(self.hand)                    
+                choice: np.ndarray = human_chooseCard(self.hand)
                 argmax = np.argmax(choice)                                          # =0: 结束回合, >0: 出牌
                 if (argmax == 0):                                                   # 动作：结束回合
                     # 手牌全部弃置
@@ -156,7 +156,7 @@ class CombatContext:
                 self.debugPrint(f"Debug: Player HP: {self.player.current_hp}, Shield: {self.player.shield}")
                 for enemy in self.enemies: self.debugPrint(f"Debug: Enemy {enemy.name} HP: {enemy.current_hp}, Shield: {enemy.shield}")
 
-                choice: np.ndarray = action                                         
+                choice: np.ndarray = action
                 argmax = np.argmax(choice)                                          # =0: 结束回合, >0: 出牌
                 if (argmax == 0):                                                   # 动作：结束回合
                     # 手牌全部弃置
@@ -184,13 +184,10 @@ class CombatContext:
     def toNextState(self):
         """
         切换到下一个等待状态
-        返回值：是否结束游戏
         """
-        game_end = False
         while (not self.waiting) and len(self.actionQueue) > 0:
             self.actionPop()(self)
-            if (self.checkEnd()): game_end = True
-        return game_end
+            self.checkEnd()
 
     def rl_init(self):
         """

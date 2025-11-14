@@ -11,15 +11,14 @@ class STS_Gym:
         pass
 
     def step(self, context: CombatContext, action: np.ndarray):
-        game_end = context.rl_step(action)
-        game_end = game_end or context.toNextState()
+        context.rl_step(action)
         
-        if(game_end): return context.player_win_flag
 
     def reset(self, context: CombatContext):
         self.context = CombatContext()
 
     def getState(self, context: CombatContext) -> np.ndarray:
+        context.toNextState()
         cur_hp = context.player.current_hp
         max_hp = context.player.max_hp
         cur_shield = context.player.shield
@@ -29,7 +28,7 @@ class STS_Gym:
             for enemy in context.enemies
         ]
 
-        is_end = context.is_end
+        is_end = context.game_over_flag
         pass
 
 

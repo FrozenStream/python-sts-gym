@@ -26,6 +26,5 @@ gym = STS_Gym()
 gym.reset(ctx)
 while(True):
     game_end = ctx.toNextState()
-    
     state = gym.getState(ctx)
     pass

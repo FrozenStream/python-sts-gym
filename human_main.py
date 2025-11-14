@@ -21,7 +21,6 @@ cards = [
 
 
 ctx = CombatContext(player, enemy, cards, debug=True)
-while(True):
-    state = ctx.toNextState()
-    end = ctx.human_step()
-    if end: break
+while(not ctx.game_over_flag):
+    ctx.toNextState()
+    ctx.human_step()
