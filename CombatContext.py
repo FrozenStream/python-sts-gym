@@ -142,10 +142,9 @@ class CombatContext:
         玩家回合
         返回值：是否结束游戏
         """
-        game_end = self.toNextState()
-        if (game_end): return True
+        self.toNextState()
+        if (self.game_over_flag): return True
 
-        turn_end: bool = False
         if (self.new_turn_flag):
             self.new_turn_flag = False
             self.playerTurnBegin()
@@ -157,30 +156,30 @@ class CombatContext:
                 self.debugPrint(f"Debug: Player HP: {self.player.current_hp}, Shield: {self.player.shield}")
                 for enemy in self.enemies: self.debugPrint(f"Debug: Enemy {enemy.name} HP: {enemy.current_hp}, Shield: {enemy.shield}")
 
-                choice: np.ndarray = action                                 # 出牌动作
-                argmax = np.argmax(choice)
-                if (argmax == 0): turn_end = True                           # 检查是否结束回合
-
-                card = self.hand[argmax - 1]
-                if (self.Energy >= card.cost):                              # 执行卡牌动作
-                    self.hand.remove(card)                                  # 从手牌中移除
-                    self.Energy -= card.cost
-                    for action in card.actions: self.actionPush(action)
-                if (not card.is_exhaust): self.discard_pile.append(card)    # 非消耗牌加入弃牌堆
+                choice: np.ndarray = action                                         
+                argmax = np.argmax(choice)                                          # =0: 结束回合, >0: 出牌
+                if (argmax == 0):                                                   # 动作：结束回合
+                    # 手牌全部弃置
+                    for card in self.hand:
+                        if (not card.is_ethereal): self.discard_pile.append(card)   # 非虚无牌加入弃牌堆
+                    self.hand.clear()
+                    self.enemys_turn()
+                    if (self.game_over_flag): return True
+                else:                                                               # 动作：出牌
+                    card = self.hand[argmax - 1]
+                    if (self.Energy >= card.cost):                                  # 执行卡牌动作
+                        self.hand.remove(card)                                      # 从手牌中移除
+                        self.Energy -= card.cost
+                        for action in card.actions: self.actionPush(action)
+                    if (not card.is_exhaust): self.discard_pile.append(card)        # 非消耗牌加入弃牌堆
 
             case IOtype.CHOOSE_ENTITY:
-                self.choice: np.ndarray = action                            # 出牌动作
+                self.choice: np.ndarray = action
                 self.actionPop()(self)
-                game_end = self.checkEnd()
+                self.checkEnd()
+                if (self.game_over_flag): return True
 
-        if (turn_end):
-            # 手牌全部弃置
-            for card in self.hand:
-                if (not card.is_ethereal): self.discard_pile.append(card)   # 非虚无牌加入弃牌堆
-            self.hand.clear()
-            game_end = game_end or self.enemys_turn()
-
-        return game_end
+        return False
 
     def toNextState(self):
         """
