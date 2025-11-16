@@ -31,3 +31,14 @@ def human_chooseCard(hand: list[Card]) -> np.ndarray:
     ans = np.array([0] * 11)
     ans[choice] = 1
     return ans
+
+
+def human_chooseDiscard(hand: list[Card]) -> np.ndarray:
+    """选择弃牌"""
+    print('Debug: Please choose a card to discard.')
+    for i, card in enumerate(hand):
+        print(f'{i}: {card.name} Cost: {card.cost}')
+    choice = int(input())
+    ans = np.array([0] * 11)
+    ans[choice] = 1
+    return ans

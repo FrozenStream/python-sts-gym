@@ -17,6 +17,7 @@ cards = [
     defend,
     defend,
     defend,
+    prepared,
 ]
 
 

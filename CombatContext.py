@@ -2,7 +2,7 @@ from Entity import Entity
 from Enemys import Enemy
 from Cards import Card
 import random
-from CommandIO import human_chooseCard, human_chooseEntity, IOtype
+from CommandIO import human_chooseCard, human_chooseEntity, human_chooseDiscard, IOtype
 from Powers import Power
 from typing import Callable, Union
 from collections import deque
@@ -23,7 +23,7 @@ class CombatContext:
         self.turns = 0
         self.Energy = 0
 
-        self.draw_pile: list[Card] = draw_pile
+        self.draw_pile: list[Card] = np.random.permutation(draw_pile).tolist()
         self.hand: list[Card] = []
         self.discard_pile: list[Card] = []
 
@@ -40,6 +40,9 @@ class CombatContext:
 
     def actionPop(self) -> Callable[['CombatContext'], None]:
         return self.actionQueue.popleft()
+
+    def howManyLivingEnemies(self) -> int:
+        return sum(not enemy.OUT for enemy in self.enemies)
 
     def needChoice(self, type: IOtype):
         self.waiting = True
@@ -65,7 +68,7 @@ class CombatContext:
         返回值：是否结束游戏
         """
         if (self.player.current_hp <= 0):
-            self.debugPrint(f"Debug: Player {self.player.name} lost.")
+            self.debugPrint(f"Debug: Player lost.")
             self.player_win_flag = False
             self.game_over_flag = True
         elif (all(enemy.OUT for enemy in self.enemies)):
@@ -135,6 +138,12 @@ class CombatContext:
                 self.checkEnd()
                 if (self.game_over_flag): return True
 
+            case IOtype.CHOOSE_DISCARD:
+                self.choice: np.ndarray = human_chooseDiscard(self.hand)
+                self.actionPop()(self)
+                self.checkEnd()
+                if (self.game_over_flag): return True
+
         return False
 
     def rl_step(self, action):
@@ -175,6 +184,12 @@ class CombatContext:
 
             case IOtype.CHOOSE_ENTITY:
                 self.choice: np.ndarray = action
+                self.actionPop()(self)
+                self.checkEnd()
+                if (self.game_over_flag): return True
+
+            case IOtype.CHOOSE_DISCARD:
+                self.choice: np.ndarray = human_chooseDiscard(self.hand)
                 self.actionPop()(self)
                 self.checkEnd()
                 if (self.game_over_flag): return True
