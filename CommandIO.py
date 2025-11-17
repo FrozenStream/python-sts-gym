@@ -13,6 +13,7 @@ def human_chooseEntity(Entitys: list[Entity]) -> np.ndarray:
     """选择实体"""
     print('Debug: Please choose an entity.')
     for i, entity in enumerate(Entitys):
+        if entity.OUT: continue
         print(f'{i}: {entity.name}')
     choice = int(input())
 

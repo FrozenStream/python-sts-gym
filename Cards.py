@@ -1,6 +1,4 @@
 from typing import Callable, Tuple
-
-
 from enum import Enum
 
 

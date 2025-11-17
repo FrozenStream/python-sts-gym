@@ -11,7 +11,7 @@ class STS_Gym:
         pass
 
     def step(self, context: CombatContext, action: np.ndarray):
-        context.rl_step(action)
+        context.step(action)
         
 
     def reset(self, context: CombatContext):
