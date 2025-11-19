@@ -1,8 +1,7 @@
 from CombatContext import CombatContext
-from Entity import Entity, Player, Enemy
+from Entity import Player
 from InstancesCard import *
 from InstancesEnemy import *
-from Cards import *
 from CommandIO import *
 
 player = Player('Player', 80)
@@ -10,28 +9,24 @@ enemy = [
     JawWorm(),
     JawWorm(),
     JawWorm(),
-    JawWorm(),
 ]
 
 cards = [
-    attack,
-    attack,
-    attack,
-    attack,
-    defend,
-    defend,
-    defend,
-    defend,
-    prepared,
+    Strike_red,
+    Strike_red,
+    Defend_red,
+    Defend_red,
+    Dash,
+    Dropkick,
 ]
 
 
 ctx = CombatContext(player, enemy, cards, debug=True)
-while(not ctx.game_over_flag):
+while not ctx.game_over_flag:
     ctx.toNextState()
     ctx.DebugPrintState()
-    match ctx.type:
-        case IOtype.CHOOSE_CARD: input = human_chooseCard(ctx.hand)
-        case IOtype.CHOOSE_ENTITY: input = human_chooseEntity(ctx.enemies)
-        case IOtype.CHOOSE_DISCARD: input = human_chooseDiscard(ctx.hand)
-    ctx.step(input)
+    match ctx.io_type:
+        case IOtype.CHOOSE_CARD: step = human_chooseCard(ctx.hand)
+        case IOtype.CHOOSE_ENTITY: step = human_chooseEntity(ctx.enemies)
+        case IOtype.CHOOSE_DISCARD: step = human_chooseDiscard(ctx.hand)
+    ctx.step(step)

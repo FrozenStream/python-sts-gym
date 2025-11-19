@@ -11,12 +11,15 @@ class Power(Enum):
     FRAGILE = 6  # 脆弱
 
 
-
 class PowerPool():
-    _powers: list[int] = [0] * len(Power)
+    def __init__(self):
+        self._powers: list[int] = [0] * len(Power)
 
     def getPower(self, power: Power) -> int:
         return self._powers[power.value]
 
     def addPower(self, power: Power, amount: int):
         self._powers[power.value] += amount
+
+    def displayPower(self) -> str:
+        return ' '.join([f'{power.name}: {self._powers[power.value]}' for power in Power if self._powers[power.value] > 0])

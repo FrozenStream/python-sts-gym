@@ -1,4 +1,5 @@
 from Powers import Power, PowerPool
+from typing import Callable
 
 class Entity():
     """实体基类"""
@@ -52,5 +53,5 @@ class Enemy(Entity):
     def __init__(self, name: str, max_hp):
         super().__init__(name, max_hp)
 
-    def move(self, context, turns: int):
+    def move(self, context, turns: int, debugPrint: Callable[[str], None]):
         pass
